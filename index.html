@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Subdomain Takeover - wrathsec</title>
+  <meta name="robots" content="noindex,nofollow">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #0d1117;
+      color: #c9d1d9;
+      font: 16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    }
+    .card {
+      width: min(680px, calc(100% - 32px));
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.35);
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(56, 139, 253, 0.15);
+      color: #58a6ff;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      border: 1px solid rgba(56, 139, 253, 0.4);
+    }
+    h1 { margin: 0 0 16px; font-size: 28px; line-height: 1.2; color: #f0f6fc; }
+    p { margin: 0 0 12px; color: #8b949e; }
+    .info-box {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #30363d;
+      text-align: left;
+    }
+    code {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 3px 8px;
+      color: #79c0ff;
+      font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+    }
+    .signature {
+      margin-top: 20px;
+      font-weight: 600;
+      color: #3fb950;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="badge">Security PoC</div>
+    <h1>Subdomain Takeover PoC</h1>
+    <p>This host was identified as having a dangling DNS record pointing to Vercel.</p>
+    
+    <div class="info-box">
+      <p>Target Domain: <code>staging-admin-deprecated.ofza.com</code></p>
+      <p>Researcher: <code>wrathsec</code></p>
+      <p>Status: <code>Host Control Verified</code></p>
+      <p>Timestamp: <code>2026-04-16 13:45 UTC</code></p>
+    </div>
+
+    <p class="signature">Proof of Concept by wrathsec</p>
+  </main>
+</body>
+</html>
