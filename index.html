@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Subdomain Takeover - wrathsec</title>
   <meta name="robots" content="noindex,nofollow">
+  
+  <script>
+    try {
+      document.domain = "ofza.com";
+      console.log("Document domain set to: " + document.domain);
+    } catch (e) {
+      console.error("Could not set document.domain: ", e);
+    }
+  </script>
+
   <style>
     body {
       margin: 0;
